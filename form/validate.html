@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>表单验证</title>
+  <meta charset="utf-8">
+  <style type="text/css">
+    input.error{
+      border: 1px solid red;
+    }
+  </style>
+</head>
+<body>
+
+<form>
+  <p>username: <input type="text" value="" name="username" data-pattern="\w{4,}" data-message="用户名必须 4 位以上" required></p>
+  <p>url: <input type="text" value="" name="url" data-pattern="^https?:\/\/" data-message="url 不合法"></p>
+  <p>email: <input type="text" value="" name="email" data-pattern="@" data-message="email 不合法"></p>
+  <p><button id="check">校验</button></p>
+</form>
+
+<script>
+  var check = document.querySelector( '#check' );
+  var form = document.querySelector( 'form' );
+
+  check.addEventListener( 'click', function( event ){
+    var result = validate( form );
+    event.preventDefault();
+
+    // if( result !== true ){
+    //   window.alert( result[ 0 ].message ); 
+    //   result[ 0 ].input.focus();
+    // }else{
+    //   window.alert( '全部通过!' );
+    // }
+
+    var inputs = [].slice.call( form.querySelectorAll( 'input' ) );
+
+    inputs.forEach( function( input ){
+      input.className = ''; 
+      if( input.nextSibling ){
+        input.parentNode.removeChild( input.nextSibling );
+      }
+    } );
+
+    if( result !== true ){
+      result.forEach( function( error ){
+        error.input.className = 'error';
+        var span = document.createElement( 'span' );
+        span.innerHTML = error.message;
+        error.input.parentNode.appendChild( span );
+      } );
+    }
+  } );
+
+
+  function validate( form ){
+    var inputs = [].slice.call( form.querySelectorAll( '[data-pattern]' ) );
+
+    var result = [];
+
+    inputs.forEach( function( input ){
+      var regx = RegExp( input.dataset.pattern );
+
+      if( !regx.test( input.value ) ){
+        result.push( {
+          input: input,
+          message: input.dataset.message
+        } );
+      }
+    } );
+
+    return result.length ? result : true;
+  }
+</script>
+
+</body>
+</html>
